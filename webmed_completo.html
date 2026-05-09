@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Webmed | Salud inteligente a tu alcance</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fc;
+            color: #1a2c3e;
+            line-height: 1.4;
+        }
+
+        /* ========== MODAL AUTH ========== */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .auth-modal.hidden {
+            display: none;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 3rem;
+            width: 100%;
+            max-width: 420px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .auth-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #0b2b3b;
+        }
+
+        .auth-subtitle {
+            color: #6f8f9c;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #1a2c3e;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbdde4;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #2aa7a0;
+            box-shadow: 0 0 0 3px rgba(42,167,160,0.1);
+            outline: none;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #0b2b3b 0%, #144d5e 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(11,43,59,0.3);
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #6f8f9c;
+        }
+
+        .auth-toggle a {
+            color: #2aa7a0;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 1.2rem;
+        }
+
+        .role-btn {
+            padding: 12px;
+            border: 2px solid #cbdde4;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .role-btn.active {
+            border-color: #2aa7a0;
+            background: #e8f9f7;
+            color: #0b5e6b;
+        }
+
+        /* ========== APP MAIN ========== */
+        .app-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.03);
+        }
+
+        .main-header {
+            background: linear-gradient(135deg, #0b2b3b 0%, #144d5e 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 4px solid #2aa7a0;
+        }
+
+        .logo h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: #7dd3cf;
+            font-weight: 300;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+        }
+
+        .user-badge {
+            font-size: 0.75rem;
+            background: rgba(125,211,207,0.3);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 0.3rem 0.9rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #c73f1e;
+            border-color: #c73f1e;
+        }
+
+        .dashboard-nav {
+            background: #ffffff;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #e2edf2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 0.7rem 1.3rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #2c5a6e;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .nav-btn i {
+            font-size: 1rem;
+        }
+
+        .nav-btn.active {
+            background: #e2f0f3;
+            color: #0b5e6b;
+            border-bottom: 2px solid #2aa7a0;
+            border-radius: 30px 30px 20px 20px;
+        }
+
+        .nav-btn:hover:not(.active) {
+            background: #ebf5f8;
+        }
+
+        .main-content {
+            padding: 2rem;
+            background: #fefefe;
+        }
+
+        .section {
+            display: none;
+            animation: fade 0.25s ease;
+        }
+
+        .section.active-section {
+            display: block;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(6px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 0 0 1px #eef3f7;
+            padding: 1.5rem;
+            transition: 0.2s;
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #154e5e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        input, select, textarea {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #cbdde4;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #2aa7a0;
+            box-shadow: 0 0 0 2px rgba(42,167,160,0.2);
+        }
+
+        button {
+            background: #2aa7a0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.85rem;
+        }
+
+        button:hover {
+            background: #1e7f7a;
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background: #cbdde4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .doctor-item, .medicine-item {
+            border-bottom: 1px solid #e5eff2;
+            padding: 0.9rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .doctor-info strong, .medicine-name {
+            font-weight: 700;
+        }
+
+        .badge {
+            background: #dcfce7;
+            color: #15803d;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+        }
+
+        .badge.danger {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .alert-message {
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 1rem;
+            background: #f0f9ff;
+            border-left: 4px solid #2aa7a0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2edf2;
+        }
+
+        th {
+            background: #f9fdfe;
+            font-weight: 600;
+            color: #0b5e6b;
+        }
+
+        .feedback-list {
+            background: #f9fdfe;
+            border-radius: 20px;
+            padding: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.8rem;
+            color: #6f8f9c;
+            border-top: 1px solid #e2edf2;
+            background: white;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .admin-stat {
+            background: linear-gradient(135deg, #0b2b3b 0%, #144d5e 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .admin-stat .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .admin-stat .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .tab-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: #e2edf2;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #2aa7a0;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #991b1b;
+        }
+
+        .btn-secondary {
+            background: #6f8f9c;
+        }
+
+        .btn-secondary:hover {
+            background: #4a5f6f;
+        }
+
+        @media (max-width: 680px) {
+            .main-header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            .dashboard-nav {
+                justify-content: center;
+            }
+            .auth-container {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== AUTH MODAL ========== -->
+<div class="auth-modal" id="authModal">
+    <div class="auth-container">
+        <h2 class="auth-title" id="authTitle">Bienvenido a Webmed</h2>
+        <p class="auth-subtitle" id="authSubtitle">Inicia sesión para acceder</p>
+
+        <!-- LOGIN FORM -->
+        <div id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="tu@email.com">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button class="auth-btn" id="loginBtn">Iniciar sesión</button>
+            <div class="auth-toggle">
+                ¿No tienes cuenta? <a id="toggleRegister">Crear cuenta</a>
+            </div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="registerForm" style="display:none;">
+            <div class="form-group">
+                <label>Tipo de usuario</label>
+                <div class="role-selector">
+                    <button class="role-btn active" data-role="paciente">
+                        <i class="fas fa-user"></i> Paciente
+                    </button>
+                    <button class="role-btn" data-role="medico">
+                        <i class="fas fa-user-md"></i> Médico
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Nombre completo</label>
+                <input type="text" id="registerName" placeholder="Juan Pérez">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="registerEmail" placeholder="tu@email.com">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="registerPassword" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label>Confirmar contraseña</label>
+                <input type="password" id="registerPasswordConfirm" placeholder="••••••••">
+            </div>
+            <div id="medicoFields" style="display:none;">
+                <div class="form-group">
+                    <label>Especialidad</label>
+                    <select id="medico_especialidad">
+                        <option>Cardiología</option>
+                        <option>Pediatría</option>
+                        <option>Dermatología</option>
+                        <option>Medicina General</option>
+                        <option>Psiquiatría</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Número de Cédula Profesional</label>
+                    <input type="text" id="medico_cedula" placeholder="12345678">
+                </div>
+            </div>
+            <button class="auth-btn" id="registerBtn">Crear cuenta</button>
+            <div class="auth-toggle">
+                ¿Ya tienes cuenta? <a id="toggleLogin">Inicia sesión</a>
+            </div>
+        </div>
+
+        <!-- DEMO ACCOUNTS -->
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2edf2;">
+            <p style="font-size: 0.8rem; color: #6f8f9c; margin-bottom: 0.8rem;">📌 <strong>Cuentas demo:</strong></p>
+            <button class="auth-btn btn-secondary" id="demoAdmin">Admin: admin@webmed.com</button>
+            <button class="auth-btn btn-secondary" id="demoPatient">Paciente: paciente@webmed.com</button>
+            <button class="auth-btn btn-secondary" id="demoDoctor">Médico: medico@webmed.com</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
+<div class="app-container" id="webmedApp" style="display:none;">
+    <header class="main-header">
+        <div class="logo">
+            <h1>Webmed<span>Health</span></h1>
+            <p style="font-size: 0.75rem; opacity:0.8;">Atención médica instantánea · Doctores · Medicinas · Seguros</p>
+        </div>
+        <div class="user-area" id="userArea">
+            <i class="fas fa-user-circle" style="font-size:1.6rem;"></i>
+            <div>
+                <div id="userNameDisplay" style="font-weight:500;">Usuario</div>
+                <span class="user-badge" id="userRoleBadge">Paciente</span>
+            </div>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</button>
+        </div>
+    </header>
+
+    <nav class="dashboard-nav" id="mainNav">
+        <button class="nav-btn active" data-section="dashboard"><i class="fas fa-home"></i> Inicio</button>
+        <button class="nav-btn" data-section="resources"><i class="fas fa-stethoscope"></i> Salud A-Z</button>
+        <button class="nav-btn" data-section="doctors"><i class="fas fa-map-marker-alt"></i> Encontrar Doctor</button>
+        <button class="nav-btn" data-section="drugs"><i class="fas fa-pills"></i> Medicinas</button>
+        <button class="nav-btn" data-section="insurance"><i class="fas fa-shield-alt"></i> Seguros</button>
+        <button class="nav-btn" data-section="news"><i class="fas fa-newspaper"></i> Noticias</button>
+        <button class="nav-btn" data-section="payment"><i class="fas fa-credit-card"></i> Pagos</button>
+        <button class="nav-btn" data-section="feedback"><i class="fas fa-star"></i> Opiniones</button>
+        <button class="nav-btn" id="adminBtn" data-section="admin" style="display:none;"><i class="fas fa-sliders-h"></i> Panel Admin</button>
+    </nav>
+
+    <main class="main-content">
+        <!-- DASHBOARD INICIO -->
+        <div id="dashboardSection" class="section active-section">
+            <h2><i class="fas fa-home"></i> Bienvenido a Webmed</h2>
+            <div class="card-grid">
+                <div class="card" style="grid-column: 1 / -1;">
+                    <h3><i class="fas fa-info-circle"></i> Tu Panel de Salud</h3>
+                    <p id="dashboardWelcome">Cargando información...</p>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-stethoscope"></i> Salud A-Z</h3>
+                    <p>Accede a información de síntomas, calculadoras y recursos médicos.</p>
+                    <button onclick="navegarA('resources')">Explorar</button>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-user-md"></i> Encontrar Doctor</h3>
+                    <p>Busca especialistas cercanos a tu ubicación.</p>
+                    <button onclick="navegarA('doctors')">Buscar doctor</button>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-truck"></i> Medicinas</h3>
+                    <p>Compra medicamentos con entrega a domicilio.</p>
+                    <button onclick="navegarA('drugs')">Ver farmacia</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN SALUD A-Z -->
+        <div id="resourcesSection" class="section">
+            <h2><i class="fas fa-book-open"></i> Health A–Z · Síntomas y recursos</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3><i class="fas fa-head-side-medical"></i> Revisador de síntomas</h3>
+                    <p>Escribe los síntomas y obtén una posible orientación médica.</p>
+                    <textarea id="symptomInput" rows="2" placeholder="Ej: dolor de cabeza, fiebre, mareos..." style="border-radius: 12px;"></textarea>
+                    <button id="checkSymptomsBtn" style="margin-top: 12px; width:100%;">Revisar</button>
+                    <div id="symptomResult" class="alert-message" style="display:none;"></div>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-calculator"></i> Calculadora de Salud (IMC)</h3>
+                    <div><input type="number" id="peso" placeholder="Peso (kg)" style="margin-bottom: 8px;"></div>
+                    <div><input type="number" id="altura" placeholder="Altura (cm)" style="margin-bottom: 12px;"></div>
+                    <button id="calcIMC" style="width:100%;">Calcular IMC</button>
+                    <p id="imcResult" style="margin-top: 12px; font-weight:500;"></p>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-ambulance"></i> Solicitar ambulancia</h3>
+                    <p>Emergencia médica 24/7. Indica tu ubicación actual.</p>
+                    <input type="text" id="ubicacionAmbulancia" placeholder="Dirección o coordenadas">
+                    <button id="solicitarAmbulanciaBtn" style="width:100%; margin-top:8px;">Solicitar ambulancia</button>
+                    <div id="ambulanciaStatus" class="alert-message" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN BUSCAR DOCTOR -->
+        <div id="doctorsSection" class="section">
+            <h2><i class="fas fa-user-md"></i> Encuentra doctores por ubicación geográfica</h2>
+            <div class="search-bar">
+                <input type="text" id="ubicacionDoctor" placeholder="Tu ciudad o código postal" value="Centro Médico" style="flex:1;">
+                <select id="especialidadDoc" style="flex:1;">
+                    <option value="">Todas las especialidades</option>
+                    <option value="Cardiología">Cardiología</option>
+                    <option value="Pediatría">Pediatría</option>
+                    <option value="Dermatología">Dermatología</option>
+                    <option value="Medicina General">Medicina General</option>
+                </select>
+                <button id="buscarDoctoresBtn" style="white-space:nowrap;"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+            <div id="doctoresListado" class="card-grid" style="grid-template-columns:1fr;"></div>
+        </div>
+
+        <!-- MÓDULO MEDICINAS -->
+        <div id="drugsSection" class="section">
+            <h2><i class="fas fa-truck"></i> Farmacia Online · Entrega a domicilio</h2>
+            <div class="search-bar">
+                <input type="text" id="buscarMedicamento" placeholder="Buscar medicamento (ej: ibuprofeno, paracetamol)" style="flex:1;">
+                <button id="searchMedicineBtn">Buscar</button>
+            </div>
+            <div id="catalogoMedicamentos" class="card-grid"></div>
+            <div id="carritoCompras" style="margin-top: 2rem;">
+                <h3><i class="fas fa-shopping-cart"></i> Tu pedido actual</h3>
+                <ul id="listaCarrito" style="list-style: none; padding-left: 0;"></ul>
+                <p><strong id="totalCarrito">Total: $0</strong></p>
+                <button id="finalizarPedidoBtn" style="background:#0f6b64; width:100%;">Proceder al pago</button>
+            </div>
+        </div>
+
+        <!-- PLANES DE SEGUROS -->
+        <div id="insuranceSection" class="section">
+            <h2><i class="fas fa-file-invoice-dollar"></i> Guía de seguros médicos</h2>
+            <div class="card-grid" id="planesSeguros"></div>
+        </div>
+
+        <!-- NOTICIAS -->
+        <div id="newsSection" class="section">
+            <h2><i class="fas fa-chalkboard-user"></i> News & Experts · Campañas de salud</h2>
+            <div class="card-grid" id="newsList"></div>
+            <div class="card" style="margin-top: 20px;">
+                <h3><i class="fas fa-hand-holding-heart"></i> Próximas jornadas de donación de sangre</h3>
+                <ul id="bloodCampsList"></ul>
+            </div>
+        </div>
+
+        <!-- PAGOS -->
+        <div id="paymentSection" class="section">
+            <h2><i class="fas fa-wallet"></i> Pasarela de pagos y reembolsos</h2>
+            <div class="card">
+                <h3>💳 Realizar pago</h3>
+                <p>Simulación de pago para servicios médicos / medicinas / seguros.</p>
+                <input type="text" placeholder="Monto a pagar" id="montoPago" value="125.00">
+                <select id="metodoPago" style="margin-top:8px;">
+                    <option>Tarjeta de crédito</option>
+                    <option>PayPal</option>
+                    <option>Transferencia</option>
+                </select>
+                <button id="realizarPagoBtn" style="width:100%; margin-top:12px;">Confirmar pago</button>
+                <div id="paymentResponse" style="margin-top: 15px;"></div>
+                <hr style="margin:20px 0">
+                <h3>🔄 Solicitar reembolso (proveedores)</h3>
+                <button id="solicitarReembolsoBtn" style="width:100%;">Solicitar reembolso de servicio</button>
+            </div>
+        </div>
+
+        <!-- FEEDBACK -->
+        <div id="feedbackSection" class="section">
+            <h2><i class="fas fa-comment-dots"></i> Opiniones de usuarios</h2>
+            <div class="card">
+                <textarea id="nuevaOpinion" rows="2" placeholder="Escribe tu experiencia con Webmed..." style="border-radius:12px;"></textarea>
+                <button id="enviarOpinionBtn" style="width:100%; margin-top:12px;">Publicar reseña</button>
+                <div id="listaOpiniones" class="feedback-list" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+
+        <!-- PANEL ADMIN -->
+        <div id="adminSection" class="section">
+            <h2><i class="fas fa-sliders-h"></i> Panel de Administración</h2>
+            
+            <div class="card-grid">
+                <div class="admin-stat">
+                    <div class="number" id="statsUsers">0</div>
+                    <div class="label">Usuarios Registrados</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="number" id="statsDoctors">0</div>
+                    <div class="label">Médicos Activos</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="number" id="statsMedicines">0</div>
+                    <div class="label">Medicamentos</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3><i class="fas fa-cog"></i> Gestión de Datos</h3>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="tab-btn active" onclick="mostrarTab('usuarios')">👥 Usuarios</button>
+                    <button class="tab-btn" onclick="mostrarTab('medicos')">👨‍⚕️ Médicos</button>
+                    <button class="tab-btn" onclick="mostrarTab('medicinas')">💊 Medicinas</button>
+                    <button class="tab-btn" onclick="mostrarTab('seguros')">🛡️ Seguros</button>
+                    <button class="tab-btn" onclick="mostrarTab('noticias')">📰 Noticias</button>
+                </div>
+
+                <!-- TAB: USUARIOS -->
+                <div id="usuariosTab" class="tab-content active" style="margin-top: 1.5rem;">
+                    <h4>Gestionar Usuarios</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuariosTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TAB: MÉDICOS -->
+                <div id="medicosTab" class="tab-content" style="margin-top: 1.5rem;">
+                    <div style="margin-bottom: 1rem;">
+                        <h4>Agregar Nuevo Médico</h4>
+                        <input type="text" id="medico_nombre" placeholder="Nombre" style="margin-bottom:8px;">
+                        <input type="text" id="medico_especialidad_new" placeholder="Especialidad" style="margin-bottom:8px;">
+                        <input type="text" id="medico_ubicacion" placeholder="Ubicación" style="margin-bottom:8px;">
+                        <button onclick="agregarMedicoAdmin()" style="width:100%;">Agregar Médico</button>
+                    </div>
+                    <h4>Médicos Registrados</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Especialidad</th>
+                                <th>Ubicación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="medicosTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TAB: MEDICINAS -->
+                <div id="medicinasTab" class="tab-content" style="margin-top: 1.5rem;">
+                    <div style="margin-bottom: 1rem;">
+                        <h4>Agregar Nuevo Medicamento</h4>
+                        <input type="text" id="med_nombre" placeholder="Nombre" style="margin-bottom:8px;">
+                        <input type="number" id="med_precio" placeholder="Precio" style="margin-bottom:8px;">
+                        <button onclick="agregarMedicamentoAdmin()" style="width:100%;">Agregar Medicamento</button>
+                    </div>
+                    <h4>Medicamentos en Catálogo</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="medicinasTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TAB: SEGUROS -->
+                <div id="segurosTab" class="tab-content" style="margin-top: 1.5rem;">
+                    <div style="margin-bottom: 1rem;">
+                        <h4>Agregar Nuevo Plan</h4>
+                        <input type="text" id="seg_nombre" placeholder="Nombre del plan" style="margin-bottom:8px;">
+                        <input type="text" id="seg_cobertura" placeholder="Cobertura" style="margin-bottom:8px;">
+                        <input type="number" id="seg_precio" placeholder="Precio/mes" style="margin-bottom:8px;">
+                        <button onclick="agregarSeguroAdmin()" style="width:100%;">Agregar Plan</button>
+                    </div>
+                    <h4>Planes de Seguros</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cobertura</th>
+                                <th>Precio/mes</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="segurosTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TAB: NOTICIAS -->
+                <div id="noticiasTab" class="tab-content" style="margin-top: 1.5rem;">
+                    <div style="margin-bottom: 1rem;">
+                        <h4>Publicar Nueva Noticia</h4>
+                        <input type="text" id="noticia_titulo" placeholder="Título" style="margin-bottom:8px;">
+                        <textarea id="noticia_resumen" rows="2" placeholder="Resumen" style="margin-bottom:8px;"></textarea>
+                        <button onclick="agregarNoticiaAdmin()" style="width:100%;">Publicar Noticia</button>
+                    </div>
+                    <h4>Noticias Publicadas</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Resumen</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="noticiasTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <i class="fas fa-shield-heart"></i> Webmed - Asistencia médica instantánea.
+    </footer>
+</div>
+
+<script>
+// ================= SISTEMA DE AUTENTICACIÓN Y BASE DE DATOS =================
+
+class WebmedDB {
+    constructor() {
+        this.initializeDB();
+    }
+
+    initializeDB() {
+        const defaultData = {
+            users: [
+                { id: 'admin1', email: 'admin@webmed.com', password: 'admin123', nombre: 'Admin Webmed', rol: 'admin', fechaRegistro: new Date().toISOString() },
+                { id: 'pac1', email: 'paciente@webmed.com', password: 'paciente123', nombre: 'Carlos Morales', rol: 'paciente', fechaRegistro: new Date().toISOString() },
+                { id: 'doc1', email: 'medico@webmed.com', password: 'medico123', nombre: 'Dra. Laura Gómez', rol: 'medico', especialidad: 'Cardiología', cedula: '12345678', fechaRegistro: new Date().toISOString() }
+            ],
+            doctores: [
+                { id:1, nombre:"Dra. Laura Gómez", especialidad:"Cardiología", ubicacion:"Centro Médico", distancia:0.8, disponible:true, email: 'medico@webmed.com' },
+                { id:2, nombre:"Dr. José Ramírez", especialidad:"Pediatría", ubicacion:"Clínica del Norte", distancia:1.2, disponible:true, email: 'dr.ramirez@webmed.com' },
+                { id:3, nombre:"Dr. Andrés Salinas", especialidad:"Medicina General", ubicacion:"Consultorio Sureste", distancia:0.5, disponible:true, email: 'dr.salinas@webmed.com' },
+                { id:4, nombre:"Dra. Sofía Rodríguez", especialidad:"Dermatología", ubicacion:"DermaPlus", distancia:1.1, disponible:true, email: 'dra.sofia@webmed.com' }
+            ],
+            medicamentos: [
+                { id:1, nombre:"Ibuprofeno 400mg", precio:8.50, stock:true },
+                { id:2, nombre:"Paracetamol 500mg", precio:5.20, stock:true },
+                { id:3, nombre:"Amoxicilina 500mg", precio:12.40, stock:true },
+                { id:4, nombre:"Omeprazol 20mg", precio:9.90, stock:true }
+            ],
+            seguros: [
+                { id:1, nombre:"Plan Básico SaludPlus", cobertura:"Atención primaria", precio:35 },
+                { id:2, nombre:"Plan Familiar Integral", cobertura:"Especialidades + medicinas", precio:89 },
+                { id:3, nombre:"Plan Premium Completo", cobertura:"Internaciones, cirugías y reembolsos", precio:149 }
+            ],
+            noticias: [
+                { id:1, titulo:"Campaña de vacunación antigripal", resumen:"Protege tu salud este invierno. Centros disponibles." },
+                { id:2, titulo:"Webinar: Manejo del estrés por expertos", resumen:"Psicólogos a tu alcance, inscripción gratuita." },
+                { id:3, titulo:"Nuevo boletín de concientización", resumen:"Prevención de enfermedades cardiovasculares." }
+            ],
+            campsSangre: ["24/05 - Hospital Central", "30/05 - Unidad Móvil Centro", "10/06 - Clínica San Rafael"],
+            opiniones: ["Excelente atención médica, los doctores por ubicación funcionan perfecto", "Recibí mis medicinas en 2 horas. Genial.", "Buena variedad de seguros y calculadora IMC útil."]
+        };
+
+        if (!localStorage.getItem('webmedDB')) {
+            localStorage.setItem('webmedDB', JSON.stringify(defaultData));
+        }
+    }
+
+    getDB() {
+        return JSON.parse(localStorage.getItem('webmedDB') || '{}');
+    }
+
+    saveDB(data) {
+        localStorage.setItem('webmedDB', JSON.stringify(data));
+    }
+
+    // USUARIOS
+    registrarUsuario(email, password, nombre, rol, datosAdicionales = {}) {
+        const db = this.getDB();
+        if (db.users.some(u => u.email === email)) {
+            return { success: false, error: 'El email ya está registrado' };
+        }
+        const nuevoUsuario = {
+            id: 'user_' + Date.now(),
+            email, password, nombre, rol,
+            fechaRegistro: new Date().toISOString(),
+            ...datosAdicionales
+        };
+        db.users.push(nuevoUsuario);
+        this.saveDB(db);
+        return { success: true, usuario: nuevoUsuario };
+    }
+
+    autenticar(email, password) {
+        const db = this.getDB();
+        const usuario = db.users.find(u => u.email === email && u.password === password);
+        return usuario || null;
+    }
+
+    obtenerUsuarios() {
+        return this.getDB().users;
+    }
+
+    eliminarUsuario(id) {
+        const db = this.getDB();
+        db.users = db.users.filter(u => u.id !== id);
+        this.saveDB(db);
+    }
+
+    // DOCTORES
+    agregarDoctor(nombre, especialidad, ubicacion) {
+        const db = this.getDB();
+        const nuevoDoctor = {
+            id: Math.max(...db.doctores.map(d => d.id), 0) + 1,
+            nombre, especialidad, ubicacion,
+            distancia: Math.random() * 2,
+            disponible: true,
+            email: `doctor_${Date.now()}@webmed.com`
+        };
+        db.doctores.push(nuevoDoctor);
+        this.saveDB(db);
+        return nuevoDoctor;
+    }
+
+    obtenerDoctores() {
+        return this.getDB().doctores;
+    }
+
+    eliminarDoctor(id) {
+        const db = this.getDB();
+        db.doctores = db.doctores.filter(d => d.id !== id);
+        this.saveDB(db);
+    }
+
+    // MEDICAMENTOS
+    agregarMedicamento(nombre, precio) {
+        const db = this.getDB();
+        const nuevoMed = {
+            id: Math.max(...db.medicamentos.map(m => m.id), 0) + 1,
+            nombre, precio, stock: true
+        };
+        db.medicamentos.push(nuevoMed);
+        this.saveDB(db);
+        return nuevoMed;
+    }
+
+    obtenerMedicamentos() {
+        return this.getDB().medicamentos;
+    }
+
+    eliminarMedicamento(id) {
+        const db = this.getDB();
+        db.medicamentos = db.medicamentos.filter(m => m.id !== id);
+        this.saveDB(db);
+    }
+
+    // SEGUROS
+    agregarSeguro(nombre, cobertura, precio) {
+        const db = this.getDB();
+        const nuevoSeguro = {
+            id: Math.max(...db.seguros.map(s => s.id), 0) + 1,
+            nombre, cobertura, precio
+        };
+        db.seguros.push(nuevoSeguro);
+        this.saveDB(db);
+        return nuevoSeguro;
+    }
+
+    obtenerSeguros() {
+        return this.getDB().seguros;
+    }
+
+    eliminarSeguro(id) {
+        const db = this.getDB();
+        db.seguros = db.seguros.filter(s => s.id !== id);
+        this.saveDB(db);
+    }
+
+    // NOTICIAS
+    agregarNoticia(titulo, resumen) {
+        const db = this.getDB();
+        const nuevaNoticia = {
+            id: Math.max(...db.noticias.map(n => n.id), 0) + 1,
+            titulo, resumen
+        };
+        db.noticias.push(nuevaNoticia);
+        this.saveDB(db);
+        return nuevaNoticia;
+    }
+
+    obtenerNoticias() {
+        return this.getDB().noticias;
+    }
+
+    eliminarNoticia(id) {
+        const db = this.getDB();
+        db.noticias = db.noticias.filter(n => n.id !== id);
+        this.saveDB(db);
+    }
+}
+
+const db = new WebmedDB();
+
+// ================= ESTADO DE LA APP =================
+let usuarioActual = null;
+let carrito = [];
+
+// ================= FUNCIONES DE AUTENTICACIÓN =================
+function toggleForms() {
+    document.getElementById('loginForm').style.display = document.getElementById('loginForm').style.display === 'none' ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = document.getElementById('registerForm').style.display === 'none' ? 'block' : 'none';
+}
+
+document.getElementById('toggleRegister').addEventListener('click', toggleForms);
+document.getElementById('toggleLogin').addEventListener('click', toggleForms);
+
+// Selector de rol en registro
+document.querySelectorAll('.role-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        const rol = this.getAttribute('data-role');
+        document.getElementById('medicoFields').style.display = rol === 'medico' ? 'block' : 'none';
+    });
+});
+
+// LOGIN
+document.getElementById('loginBtn').addEventListener('click', function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) {
+        alert('Por favor completa todos los campos');
+        return;
+    }
+
+    const usuario = db.autenticar(email, password);
+    if (usuario) {
+        usuarioActual = usuario;
+        iniciarSesion();
+    } else {
+        alert('Email o contraseña incorrectos');
+    }
+});
+
+// REGISTRO
+document.getElementById('registerBtn').addEventListener('click', function() {
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+    const nombre = document.getElementById('registerName').value.trim();
+
+    if (!email || !password || !nombre) {
+        alert('Por favor completa todos los campos');
+        return;
+    }
+
+    if (password !== passwordConfirm) {
+        alert('Las contraseñas no coinciden');
+        return;
+    }
+
+    const rol = document.querySelector('.role-btn.active').getAttribute('data-role');
+    const datosAdicionales = {};
+
+    if (rol === 'medico') {
+        const especialidad = document.getElementById('medico_especialidad').value;
+        const cedula = document.getElementById('medico_cedula').value.trim();
+        if (!especialidad || !cedula) {
+            alert('Por favor completa los datos profesionales');
+            return;
+        }
+        datosAdicionales.especialidad = especialidad;
+        datosAdicionales.cedula = cedula;
+    }
+
+    const resultado = db.registrarUsuario(email, password, nombre, rol, datosAdicionales);
+
+    if (resultado.success) {
+        alert('¡Cuenta creada exitosamente! Inicia sesión con tus credenciales.');
+        usuarioActual = resultado.usuario;
+        iniciarSesion();
+    } else {
+        alert(resultado.error);
+    }
+});
+
+// CUENTAS DEMO
+document.getElementById('demoAdmin').addEventListener('click', function() {
+    const usuario = db.autenticar('admin@webmed.com', 'admin123');
+    usuarioActual = usuario;
+    iniciarSesion();
+});
+
+document.getElementById('demoPatient').addEventListener('click', function() {
+    const usuario = db.autenticar('paciente@webmed.com', 'paciente123');
+    usuarioActual = usuario;
+    iniciarSesion();
+});
+
+document.getElementById('demoDoctor').addEventListener('click', function() {
+    const usuario = db.autenticar('medico@webmed.com', 'medico123');
+    usuarioActual = usuario;
+    iniciarSesion();
+});
+
+// ================= INICIAR SESIÓN =================
+function iniciarSesion() {
+    document.getElementById('authModal').classList.add('hidden');
+    document.getElementById('webmedApp').style.display = 'block';
+    
+    // Actualizar UI
+    document.getElementById('userNameDisplay').textContent = usuarioActual.nombre;
+    document.getElementById('userRoleBadge').textContent = usuarioActual.rol.charAt(0).toUpperCase() + usuarioActual.rol.slice(1);
+
+    // Mostrar botón admin solo si es admin
+    if (usuarioActual.rol === 'admin') {
+        document.getElementById('adminBtn').style.display = 'inline-flex';
+    }
+
+    // Personalizar dashboard según rol
+    actualizarDashboardSegunRol();
+
+    // Cargar datos
+    cargarTodosDatos();
+    mostrarSeccion('dashboard');
+}
+
+function actualizarDashboardSegunRol() {
+    let mensaje = '';
+    if (usuarioActual.rol === 'admin') {
+        mensaje = `Bienvenido <strong>${usuarioActual.nombre}</strong>, administrador de Webmed. Tienes acceso total al panel de control.`;
+    } else if (usuarioActual.rol === 'medico') {
+        mensaje = `Hola Dr/Dra. <strong>${usuarioActual.nombre}</strong> (${usuarioActual.especialidad}). Gestiona tus citas y pacientes desde aquí.`;
+    } else {
+        mensaje = `Bienvenido <strong>${usuarioActual.nombre}</strong> a Webmed. Tu salud es nuestra prioridad.`;
+    }
+    document.getElementById('dashboardWelcome').innerHTML = mensaje;
+}
+
+// LOGOUT
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    usuarioActual = null;
+    carrito = [];
+    document.getElementById('webmedApp').style.display = 'none';
+    document.getElementById('authModal').classList.remove('hidden');
+    
+    // Limpiar formularios
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+});
+
+// ================= NAVEGACIÓN =================
+function mostrarSeccion(seccion) {
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(s => s.classList.remove('active-section'));
+    document.getElementById(seccion + 'Section').classList.add('active-section');
+
+    const navBtns = document.querySelectorAll('.nav-btn');
+    navBtns.forEach(btn => {
+        if (btn.getAttribute('data-section') === seccion) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function navegarA(seccion) {
+    mostrarSeccion(seccion);
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const seccion = this.getAttribute('data-section');
+        mostrarSeccion(seccion);
+    });
+});
+
+// ================= CARGA DE DATOS =================
+function cargarTodosDatos() {
+    renderDoctores(db.obtenerDoctores().slice(0, 3));
+    mostrarCatalogo();
+    mostrarSeguros();
+    renderNoticias();
+    renderOpiniones();
+    actualizarStatsAdmin();
+}
+
+// ================= SALUD A-Z =================
+document.getElementById('checkSymptomsBtn').addEventListener('click', () => {
+    let sintomas = document.getElementById('symptomInput').value;
+    let resultDiv = document.getElementById('symptomResult');
+    if (sintomas.length < 3) resultDiv.innerHTML = "⚠️ Ingresa más detalles de tus síntomas.";
+    else resultDiv.innerHTML = "🩺 Posible orientación: 'Consulta con Medicina General' o 'Cardiología' si hay dolor torácico. (Solo informativo)";
+    resultDiv.style.display = "block";
+});
+
+document.getElementById('calcIMC').addEventListener('click', () => {
+    let peso = parseFloat(document.getElementById('peso').value);
+    let alturaCm = parseFloat(document.getElementById('altura').value);
+    if (peso > 0 && alturaCm > 0) {
+        let alturaM = alturaCm / 100;
+        let imc = peso / (alturaM * alturaM);
+        document.getElementById('imcResult').innerHTML = `IMC: ${imc.toFixed(1)} - ${imc < 18.5 ? "Bajo peso" : imc < 25 ? "Normal" : imc < 30 ? "Sobrepeso" : "Obesidad"}`;
+    } else document.getElementById('imcResult').innerHTML = "Datos inválidos";
+});
+
+document.getElementById('solicitarAmbulanciaBtn').addEventListener('click', () => {
+    let ubic = document.getElementById('ubicacionAmbulancia').value;
+    if (ubic.trim() === "") ubic = "ubicación automática detectada";
+    document.getElementById('ambulanciaStatus').innerHTML = `🚑 Ambulancia en camino hacia: ${ubic}. Tiempo estimado: 12 min.`;
+});
+
+// ================= DOCTORES =================
+function renderDoctores(lista) {
+    let container = document.getElementById('doctoresListado');
+    container.innerHTML = "";
+    lista.forEach(doc => {
+        let div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+            <div>
+                <strong><i class="fas fa-map-pin"></i> ${doc.nombre}</strong> - ${doc.especialidad}
+                <br>📍 Distancia: ${doc.distancia.toFixed(1)} km · Disponible: ${doc.disponible ? 'Sí' : 'Consultar'}
+                <br><button class="agendarCitaBtn" data-id="${doc.id}" style="margin-top:8px;">Agendar cita</button>
+            </div>`;
+        container.appendChild(div);
+    });
+    document.querySelectorAll('.agendarCitaBtn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            alert('Cita solicitada. Recibirás confirmación por email.');
+        });
+    });
+}
+
+document.getElementById('buscarDoctoresBtn').addEventListener('click', () => {
+    let ubic = document.getElementById('ubicacionDoctor').value.toLowerCase();
+    let esp = document.getElementById('especialidadDoc').value;
+    let filtrados = db.obtenerDoctores().filter(d =>
+        (esp === "" || d.especialidad === esp) &&
+        (ubic === "" || d.ubicacion.toLowerCase().includes(ubic))
+    );
+    renderDoctores(filtrados.length ? filtrados : db.obtenerDoctores().slice(0, 2));
+});
+
+// ================= MEDICINAS =================
+function mostrarCatalogo(busqueda = "") {
+    let cont = document.getElementById('catalogoMedicamentos');
+    let medicamentos = db.obtenerMedicamentos();
+    let filtrados = medicamentos.filter(m => m.nombre.toLowerCase().includes(busqueda.toLowerCase()));
+    cont.innerHTML = "";
+    filtrados.forEach(med => {
+        let card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <h4>${med.nombre}</h4>
+            <p>Precio: $${med.precio.toFixed(2)}</p>
+            <button class="addCarrito" data-id="${med.id}" style="width:100%;">Agregar al carrito</button>`;
+        cont.appendChild(card);
+    });
+    document.querySelectorAll('.addCarrito').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            let id = parseInt(btn.getAttribute('data-id'));
+            let producto = db.obtenerMedicamentos().find(m => m.id === id);
+            carrito.push(producto);
+            actualizarCarritoUI();
+        });
+    });
+}
+
+function actualizarCarritoUI() {
+    let ul = document.getElementById('listaCarrito');
+    ul.innerHTML = "";
+    let total = 0;
+    carrito.forEach((item, idx) => {
+        total += item.precio;
+        let li = document.createElement('li');
+        li.style.padding = '8px 0';
+        li.innerHTML = `${item.nombre} - $${item.precio.toFixed(2)}  <button class="eliminarItem" data-idx="${idx}" style="float:right; background:none; color:#dc2626; padding:0;">🗑️</button>`;
+        ul.appendChild(li);
+    });
+    document.getElementById('totalCarrito').innerHTML = `Total: $${total.toFixed(2)}`;
+    document.querySelectorAll('.eliminarItem').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            let idx = parseInt(btn.getAttribute('data-idx'));
+            carrito.splice(idx, 1);
+            actualizarCarritoUI();
+        });
+    });
+}
+
+document.getElementById('searchMedicineBtn').addEventListener('click', () => {
+    mostrarCatalogo(document.getElementById('buscarMedicamento').value);
+});
+
+document.getElementById('finalizarPedidoBtn').addEventListener('click', () => {
+    if (carrito.length === 0) alert('Carrito vacío');
+    else {
+        const total = carrito.reduce((s, i) => s + i.precio, 0);
+        alert(`Pedido realizado con éxito. Entrega a domicilio estimada 2h. Total $${total.toFixed(2)}`);
+        carrito = [];
+        actualizarCarritoUI();
+    }
+});
+
+// ================= SEGUROS =================
+function mostrarSeguros() {
+    let container = document.getElementById('planesSeguros');
+    container.innerHTML = "";
+    db.obtenerSeguros().forEach(plan => {
+        let card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <h3>${plan.nombre}</h3>
+            <p>${plan.cobertura}</p>
+            <p><strong>$${plan.precio}/mes</strong></p>
+            <button class="contratarSeguro" style="width:100%;">Contratar</button>`;
+        container.appendChild(card);
+    });
+    document.querySelectorAll('.contratarSeguro').forEach(btn =>
+        btn.addEventListener('click', () => alert('Redirigiendo a pago de seguro.'))
+    );
+}
+
+// ================= NOTICIAS =================
+function renderNoticias() {
+    let newsDiv = document.getElementById('newsList');
+    newsDiv.innerHTML = db.obtenerNoticias().map(n =>
+        `<div class="card"><h4>📰 ${n.titulo}</h4><p>${n.resumen}</p></div>`
+    ).join("");
+    
+    let campUl = document.getElementById('bloodCampsList');
+    campUl.innerHTML = db.getDB().campsSangre.map(c =>
+        `<li style="padding: 8px 0;"><i class="fas fa-droplet"></i> ${c}</li>`
+    ).join("");
+}
+
+// ================= PAGOS =================
+document.getElementById('realizarPagoBtn').addEventListener('click', () => {
+    let monto = document.getElementById('montoPago').value;
+    let metodo = document.getElementById('metodoPago').value;
+    document.getElementById('paymentResponse').innerHTML = `✅ Pago de $${monto} con ${metodo} aprobado.`;
+});
+
+document.getElementById('solicitarReembolsoBtn').addEventListener('click', () => {
+    document.getElementById('paymentResponse').innerHTML = "🔄 Solicitud de reembolso enviada a proveedor. Tiempo estimado 7 días.";
+});
+
+// ================= FEEDBACK =================
+function renderOpiniones() {
+    let opinionesDiv = document.getElementById('listaOpiniones');
+    opinionesDiv.innerHTML = db.getDB().opiniones.map(op =>
+        `<div class="alert-message" style="margin-bottom:8px;"><i class="fas fa-comment"></i> "${op}"</div>`
+    ).join("");
+}
+
+document.getElementById('enviarOpinionBtn').addEventListener('click', () => {
+    let nueva = document.getElementById('nuevaOpinion').value;
+    if (nueva.trim()) {
+        const dbData = db.getDB();
+        dbData.opiniones.unshift(nueva);
+        db.saveDB(dbData);
+    }
+    renderOpiniones();
+    document.getElementById('nuevaOpinion').value = "";
+});
+
+// ================= PANEL ADMIN =================
+function actualizarStatsAdmin() {
+    document.getElementById('statsUsers').textContent = db.obtenerUsuarios().length;
+    document.getElementById('statsDoctors').textContent = db.obtenerDoctores().length;
+    document.getElementById('statsMedicines').textContent = db.obtenerMedicamentos().length;
+}
+
+function mostrarTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    event.target.classList.add('active');
+
+    if (tabName === 'usuarios') actualizarTablaUsuarios();
+    if (tabName === 'medicos') actualizarTablaMedicos();
+    if (tabName === 'medicinas') actualizarTablaMedicinas();
+    if (tabName === 'seguros') actualizarTablaSeguros();
+    if (tabName === 'noticias') actualizarTablaNoticias();
+}
+
+function actualizarTablaUsuarios() {
+    let tbody = document.getElementById('usuariosTableBody');
+    tbody.innerHTML = '';
+    db.obtenerUsuarios().forEach(user => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${user.email}</td>
+            <td>${user.nombre}</td>
+            <td><span class="badge">${user.rol}</span></td>
+            <td><button class="btn-danger" onclick="eliminarUserAdmin('${user.id}')" style="padding:6px 12px; font-size:0.8rem;">Eliminar</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function actualizarTablaMedicos() {
+    let tbody = document.getElementById('medicosTableBody');
+    tbody.innerHTML = '';
+    db.obtenerDoctores().forEach(doc => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${doc.nombre}</td>
+            <td>${doc.especialidad}</td>
+            <td>${doc.ubicacion}</td>
+            <td><button class="btn-danger" onclick="eliminarDoctorAdmin(${doc.id})" style="padding:6px 12px; font-size:0.8rem;">Eliminar</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function actualizarTablaMedicinas() {
+    let tbody = document.getElementById('medicinasTableBody');
+    tbody.innerHTML = '';
+    db.obtenerMedicamentos().forEach(med => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${med.nombre}</td>
+            <td>$${med.precio.toFixed(2)}</td>
+            <td><span class="badge">${med.stock ? 'Disponible' : 'Agotado'}</span></td>
+            <td><button class="btn-danger" onclick="eliminarMedicamentoAdmin(${med.id})" style="padding:6px 12px; font-size:0.8rem;">Eliminar</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function actualizarTablaSeguros() {
+    let tbody = document.getElementById('segurosTableBody');
+    tbody.innerHTML = '';
+    db.obtenerSeguros().forEach(seg => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${seg.nombre}</td>
+            <td>${seg.cobertura}</td>
+            <td>$${seg.precio}/mes</td>
+            <td><button class="btn-danger" onclick="eliminarSeguroAdmin(${seg.id})" style="padding:6px 12px; font-size:0.8rem;">Eliminar</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function actualizarTablaNoticias() {
+    let tbody = document.getElementById('noticiasTableBody');
+    tbody.innerHTML = '';
+    db.obtenerNoticias().forEach(noticia => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${noticia.titulo}</td>
+            <td>${noticia.resumen}</td>
+            <td><button class="btn-danger" onclick="eliminarNoticiaAdmin(${noticia.id})" style="padding:6px 12px; font-size:0.8rem;">Eliminar</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Funciones de CRUD Admin
+function agregarMedicoAdmin() {
+    const nombre = document.getElementById('medico_nombre').value.trim();
+    const especialidad = document.getElementById('medico_especialidad_new').value.trim();
+    const ubicacion = document.getElementById('medico_ubicacion').value.trim();
+
+    if (!nombre || !especialidad || !ubicacion) {
+        alert('Por favor completa todos los campos');
+        return;
+    }
+
+    db.agregarDoctor(nombre, especialidad, ubicacion);
+    alert('Médico agregado exitosamente');
+    document.getElementById('medico_nombre').value = '';
+    document.getElementById('medico_especialidad_new').value = '';
+    document.getElementById('medico_ubicacion').value = '';
+    actualizarTablaMedicos();
+    cargarTodosDatos();
+}
+
+function eliminarDoctorAdmin(id) {
+    if (confirm('¿Estás seguro?')) {
+        db.eliminarDoctor(id);
+        actualizarTablaMedicos();
+        cargarTodosDatos();
+    }
+}
+
+function agregarMedicamentoAdmin() {
+    const nombre = document.getElementById('med_nombre').value.trim();
+    const precio = parseFloat(document.getElementById('med_precio').value);
+
+    if (!nombre || precio <= 0) {
+        alert('Por favor completa los campos correctamente');
+        return;
+    }
+
+    db.agregarMedicamento(nombre, precio);
+    alert('Medicamento agregado exitosamente');
+    document.getElementById('med_nombre').value = '';
+    document.getElementById('med_precio').value = '';
+    actualizarTablaMedicinas();
+    cargarTodosDatos();
+}
+
+function eliminarMedicamentoAdmin(id) {
+    if (confirm('¿Estás seguro?')) {
+        db.eliminarMedicamento(id);
+        actualizarTablaMedicinas();
+        cargarTodosDatos();
+    }
+}
+
+function agregarSeguroAdmin() {
+    const nombre = document.getElementById('seg_nombre').value.trim();
+    const cobertura = document.getElementById('seg_cobertura').value.trim();
+    const precio = parseFloat(document.getElementById('seg_precio').value);
+
+    if (!nombre || !cobertura || precio <= 0) {
+        alert('Por favor completa los campos correctamente');
+        return;
+    }
+
+    db.agregarSeguro(nombre, cobertura, precio);
+    alert('Plan agregado exitosamente');
+    document.getElementById('seg_nombre').value = '';
+    document.getElementById('seg_cobertura').value = '';
+    document.getElementById('seg_precio').value = '';
+    actualizarTablaSeguros();
+    cargarTodosDatos();
+}
+
+function eliminarSeguroAdmin(id) {
+    if (confirm('¿Estás seguro?')) {
+        db.eliminarSeguro(id);
+        actualizarTablaSeguros();
+        cargarTodosDatos();
+    }
+}
+
+function agregarNoticiaAdmin() {
+    const titulo = document.getElementById('noticia_titulo').value.trim();
+    const resumen = document.getElementById('noticia_resumen').value.trim();
+
+    if (!titulo || !resumen) {
+        alert('Por favor completa todos los campos');
+        return;
+    }
+
+    db.agregarNoticia(titulo, resumen);
+    alert('Noticia publicada exitosamente');
+    document.getElementById('noticia_titulo').value = '';
+    document.getElementById('noticia_resumen').value = '';
+    actualizarTablaNoticias();
+    cargarTodosDatos();
+}
+
+function eliminarNoticiaAdmin(id) {
+    if (confirm('¿Estás seguro?')) {
+        db.eliminarNoticia(id);
+        actualizarTablaNoticias();
+        cargarTodosDatos();
+    }
+}
+
+function eliminarUserAdmin(id) {
+    if (confirm('¿Estás seguro?')) {
+        db.eliminarUsuario(id);
+        actualizarTablaUsuarios();
+        actualizarStatsAdmin();
+    }
+}
+</script>
+</body>
+</html>
